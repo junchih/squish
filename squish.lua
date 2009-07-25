@@ -31,7 +31,7 @@ if opts.very_verbose then print_debug = print; end
 
 local enable_debug = opts.enable_debug;
 
-local modules, main_files = {}, {};
+local modules, main_files, resources = {}, {}, {};
 
 --  Functions to be called from squishy file  --
 
@@ -40,6 +40,14 @@ function Module(name)
 	modules[i] = { name = name, url = ___fetch_url };
 	return function (path)
 		modules[i].path = path;
+	end
+end
+
+function Resource(name, path)
+	local i = #resources+1;
+	resources[i] = { name = name, path = path or name };
+	return function (path)
+		resources[i].path = path;
 	end
 end
 
@@ -155,6 +163,27 @@ for _, module in ipairs(modules) do
 		print_err("Couldn't pack module '"..modulename.."': "..err);
 		os.exit(1);
 	end
+end
+
+if #resources > 0 then
+	print_verbose("Packing resources...")
+	f:write("do local resources = {};\n");
+	for _, resource in ipairs(resources) do
+		local name, path = resource.name, resource.path;
+		local res_file, err = io.open(base_path..path);
+		if not res_file then
+			print_err("Couldn't load resource: "..tostring(err));
+			os.exit(1);
+		end
+		local data = res_file:read("*a");
+		local maxequals = 0;
+		data:gsub("(=+)", function (equals_string) maxequals = math.max(maxequals, #equals_string); end);
+		
+		f:write(("resources[%q] = ["):format(name), string.rep("=", maxequals+1), "[");
+		f:write(data);
+		f:write("]", string.rep("=", maxequals+1), "];");
+	end
+	f:write[[function require_resource(name) return resources[name] or error("resource '"..tostring(name).."' not found"); end end ]]
 end
 
 print_debug("Finalising...")
