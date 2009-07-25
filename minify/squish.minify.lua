@@ -76,3 +76,4 @@ end
 
 print_info("Minifying "..out_fn.."...");
 minify(out_fn, out_fn);
+print_info("OK!");
