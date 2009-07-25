@@ -26,3 +26,8 @@ if opts.with_uglify then
 	
 	Main "uglify/squish.uglify.lua"
 end
+
+-- Compile output files to Lua bytecode
+if opts.with_compile then
+	Main "compile/squish.compile.lua"
+end
