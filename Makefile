@@ -1,5 +1,5 @@
 
-OPTIONS=--with-minify --with-uglify --with-compile
+OPTIONS=--with-minify --with-uglify --with-compile --with-virtual-io
 
 squish: squish.lua squishy
 	./squish.lua $(OPTIONS)

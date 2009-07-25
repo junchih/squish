@@ -31,3 +31,7 @@ end
 if GetOption "with-compile" then
 	Main "compile/squish.compile.lua"
 end
+
+if GetOption "with-virtual-io" then
+	Resource "vio" "vio/vio.lua"
+end

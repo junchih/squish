@@ -193,6 +193,22 @@ if #resources > 0 then
 		f:write(data);
 		f:write("]", string.rep("=", maxequals+1), "];");
 	end
+	if opts.enable_virtual_io then
+		local vio = require_resource("vio");
+		if not vio then
+			print_err("Virtual IO requested but is not enabled in this build of squish");
+		else
+			-- Insert vio library
+			f:write(vio, "\n")
+			-- Override io.open to use vio if opening a resource
+			f:write[[local io_open = io.open; function io.open(fn, mode)
+					if not resources[fn] then
+						return io_open(fn, mode);
+					else
+						return vio.open(resources[fn]);
+				end end ]]
+		end
+	end
 	f:write[[function require_resource(name) return resources[name] or error("resource '"..tostring(name).."' not found"); end end ]]
 end
 
