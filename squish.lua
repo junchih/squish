@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 
 local short_opts = { v = "verbose", vv = "very_verbose", o = "output", q = "quiet", qq = "very_quiet" }
-local opts = {};
+local opts = { use_http = false };
 
 for _, opt in ipairs(arg) do
 	if opt:match("^%-") then
@@ -102,14 +102,20 @@ function fetch.filesystem(path)
 	return data;
 end
 
-function fetch.http(url)
-	local http = require "socket.http";
-	
-	local body, status = http.request(url);
-	if status == 200 then
-		return body;
+if opts.use_http then
+	function fetch.http(url)
+		local http = require "socket.http";
+		
+		local body, status = http.request(url);
+		if status == 200 then
+			return body;
+		end
+		return false, "HTTP status code: "..tostring(status);
 	end
-	return false, "HTTP status code: "..tostring(status);
+else
+	function fetch.http(url)
+		return false, "Module not found. Re-squish with --use-http option to fetch it from "..url;
+	end
 end
 
 print_info("Writing "..out_fn.."...");
