@@ -1,11 +1,16 @@
 
+-- Set this option, same as if user specified
+-- '--executable' on the command-line. Can be 
+-- disabled by user with '--no-executable'
 Option "executable"
 
+-- Output filename
 Output "squish"
 
+-- This is normal/main script
 Main "squish.lua"
 
--- Minify output
+-- Add minify extension if asked to
 if opts.with_minify then
 	Module "optlex"		"minify/optlex.lua"
 	Module "optparser"	"minify/optparser.lua"
