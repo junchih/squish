@@ -27,7 +27,7 @@ local option = {
 	}
 
 local function die(msg)
-  print("LuaSrcDiet: "..msg); os.exit()
+  print_err("minify: "..msg); os.exit(1);
 end
 
 local function load_file(fname)
