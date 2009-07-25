@@ -74,6 +74,10 @@ function Option(name)
 	end
 end
 
+function GetOption(name)
+	return opts[name:gsub('%-', '_')];
+end
+
 -- -- -- -- -- -- -- --- -- -- -- -- -- -- -- --
 
 base_path = (base_path or "."):gsub("/$", "").."/"
