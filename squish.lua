@@ -134,9 +134,10 @@ if enable_debug then
 	]];
 end
 
+print_verbose("Packing modules...");
 for _, module in ipairs(modules) do
 	local modulename, path = module.name, base_path..module.path;
-	print_verbose("Packing "..modulename.." ("..path..")...");
+	print_debug("Packing "..modulename.." ("..path..")...");
 	local data, err = fetch.filesystem(path);
 	if (not data) and module.url then
 		print_debug("Fetching: ".. module.url:gsub("%?", module.path))
