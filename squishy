@@ -19,3 +19,10 @@ if opts.with_minify then
 
 	Main "minify/squish.minify.lua"
 end
+
+-- Compress Lua scripts (an excellent hack :) )
+if opts.with_uglify then
+	Module "llex"		"uglify/llex.lua"
+	
+	Main "uglify/squish.uglify.lua"
+end
