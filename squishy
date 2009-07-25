@@ -11,7 +11,7 @@ Output "squish"
 Main "squish.lua"
 
 -- Add minify extension if asked to
-if opts.with_minify then
+if GetOption "with-minify" then
 	Module "optlex"		"minify/optlex.lua"
 	Module "optparser"	"minify/optparser.lua"
 	Module "llex"		"minify/llex.lua"
@@ -21,13 +21,13 @@ if opts.with_minify then
 end
 
 -- Compress Lua scripts (an excellent hack :) )
-if opts.with_uglify then
+if GetOption "with-uglify" then
 	Module "llex"		"uglify/llex.lua"
 	
 	Main "uglify/squish.uglify.lua"
 end
 
 -- Compile output files to Lua bytecode
-if opts.with_compile then
+if GetOption "with-compile" then
 	Main "compile/squish.compile.lua"
 end
