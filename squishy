@@ -1,0 +1,16 @@
+
+Option "executable"
+
+Output "squish"
+
+Main "squish.lua"
+
+-- Minify output
+if opts.with_minify then
+	Module "optlex"		"minify/optlex.lua"
+	Module "optparser"	"minify/optparser.lua"
+	Module "llex"		"minify/llex.lua"
+	Module "lparser"	"minify/lparser.lua"
+
+	Main "minify/squish.minify.lua"
+end
