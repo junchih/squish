@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 
 local short_opts = { v = "verbose", vv = "very_verbose", o = "output", q = "quiet", qq = "very_quiet" }
-opts = {};
+local opts = {};
 
 for _, opt in ipairs(arg) do
 	if opt:match("^%-") then
