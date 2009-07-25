@@ -74,6 +74,8 @@ function minify(srcfl, destfl)
   save_file(destfl, dat)
 end
 
-print_info("Minifying "..out_fn.."...");
-minify(out_fn, out_fn);
-print_info("OK!");
+if opts.minify ~= false then
+	print_info("Minifying "..out_fn.."...");
+	minify(out_fn, out_fn);
+	print_info("OK!");
+end
