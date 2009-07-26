@@ -78,6 +78,17 @@ function GetOption(name)
 	return opts[name:gsub('%-', '_')];
 end
 
+function Message(message)
+	print_info(message);
+end
+
+function Error(message)
+	print_err(message);
+end
+
+function Exit()
+	os.exit(1);
+end
 -- -- -- -- -- -- -- --- -- -- -- -- -- -- -- --
 
 base_path = (base_path or "."):gsub("/$", "").."/"
