@@ -79,11 +79,15 @@ function GetOption(name)
 end
 
 function Message(message)
-	print_info(message);
+	if not opts.quiet then
+		print_info(message);
+	end
 end
 
 function Error(message)
-	print_err(message);
+	if not opts.very_quiet then
+		print_err(message);
+	end
 end
 
 function Exit()
