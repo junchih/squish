@@ -145,7 +145,11 @@ print_info("Writing "..out_fn.."...");
 local f = io.open(out_fn, "w+");
 
 if opts.executable then
-	f:write("#!/usr/bin/env lua\n");
+	if opts.executable == true then
+		f:write("#!/usr/bin/env lua\n");
+	else
+		f:write(opts.executable, "\n");
+	end
 end
 
 if enable_debug then
