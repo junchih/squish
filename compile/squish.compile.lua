@@ -33,7 +33,7 @@ function compile_file(infile_fn, outfile_fn)
 		outfile:write(shebang)
 	end
 
-	outfile:write(compile_string(data, outfile_fn));
+	outfile:write(compile_string(code, outfile_fn));
 	
 	os.rename(outfile_fn..".compiled", outfile_fn);
 end
