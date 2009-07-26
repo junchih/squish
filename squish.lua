@@ -162,7 +162,7 @@ for _, module in ipairs(modules) do
 		data, err = fetch.http(module.url:gsub("%?", module.path));
 	end
 	if data then
-		f:write("package.preload['", modulename, "'] = (function ()\n");
+		f:write("package.preload['", modulename, "'] = (function (...)\n");
 		f:write(data);
 		f:write("end)\n");
 		if enable_debug then
