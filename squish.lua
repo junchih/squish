@@ -201,12 +201,18 @@ if #resources > 0 then
 			-- Insert vio library
 			f:write(vio, "\n")
 			-- Override io.open to use vio if opening a resource
-			f:write[[local io_open = io.open; function io.open(fn, mode)
+			f:write[[local io_open, io_lines = io.open, io.lines; function io.open(fn, mode)
 					if not resources[fn] then
 						return io_open(fn, mode);
 					else
 						return vio.open(resources[fn]);
-				end end ]]
+				end end
+				function io.lines(fn)
+					if not resources[fn] then
+						return io_lines(fn);
+					else
+						return vio.open(resources[fn]):lines()
+					end end ]]
 		end
 	end
 	f:write[[function require_resource(name) return resources[name] or error("resource '"..tostring(name).."' not found"); end end ]]
