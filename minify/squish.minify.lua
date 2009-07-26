@@ -48,34 +48,38 @@ local function save_file(fname, dat)
 end
 
 
-function minify(srcfl, destfl)
-  local z = load_file(srcfl)
-  llex.init(z)
-  llex.llex()
-  local toklist, seminfolist, toklnlist
-    = llex.tok, llex.seminfo, llex.tokln
-  if option["opt-locals"] then
-    optparser.print = print  -- hack
-    lparser.init(toklist, seminfolist, toklnlist)
-    local globalinfo, localinfo = lparser.parser()
-    optparser.optimize(option, toklist, seminfolist, globalinfo, localinfo)
-  end
-  optlex.print = print  -- hack
-  toklist, seminfolist, toklnlist
-    = optlex.optimize(option, toklist, seminfolist, toklnlist)
-  local dat = table.concat(seminfolist)
-  -- depending on options selected, embedded EOLs in long strings and
-  -- long comments may not have been translated to \n, tack a warning
-  if string.find(dat, "\r\n", 1, 1) or
-     string.find(dat, "\n\r", 1, 1) then
-    optlex.warn.mixedeol = true
-  end
-  -- save optimized source stream to output file
-  save_file(destfl, dat)
+function minify_string(dat)
+	llex.init(dat)
+	llex.llex()
+	local toklist, seminfolist, toklnlist
+	= llex.tok, llex.seminfo, llex.tokln
+	if option["opt-locals"] then
+		optparser.print = print  -- hack
+		lparser.init(toklist, seminfolist, toklnlist)
+		local globalinfo, localinfo = lparser.parser()
+		optparser.optimize(option, toklist, seminfolist, globalinfo, localinfo)
+	end
+	optlex.print = print  -- hack
+	toklist, seminfolist, toklnlist
+		= optlex.optimize(option, toklist, seminfolist, toklnlist)
+	local dat = table.concat(seminfolist)
+	-- depending on options selected, embedded EOLs in long strings and
+	-- long comments may not have been translated to \n, tack a warning
+	if string.find(dat, "\r\n", 1, 1) or
+		string.find(dat, "\n\r", 1, 1) then
+		optlex.warn.mixedeol = true
+	end
+	return dat;
+end
+
+function minify_file(srcfl, destfl)
+	local z = load_file(srcfl);
+	z = minify_string(z);
+	save_file(destfl, z);
 end
 
 if opts.minify ~= false then
 	print_info("Minifying "..out_fn.."...");
-	minify(out_fn, out_fn);
+	minify_file(out_fn, out_fn);
 	print_info("OK!");
 end
