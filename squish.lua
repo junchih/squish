@@ -29,6 +29,8 @@ if not opts.quiet then print_info = print; end
 if opts.verbose or opts.very_verbose then print_verbose = print; end
 if opts.very_verbose then print_debug = print; end
 
+print = print_verbose;
+
 local enable_debug = opts.enable_debug;
 
 local modules, main_files, resources = {}, {}, {};
