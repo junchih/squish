@@ -97,12 +97,20 @@ end
 
 base_path = (base_path or "."):gsub("/$", "").."/"
 squishy_file = base_path .. "squishy";
-out_fn = opts.output or "squished.out.lua";
+out_fn = opts.output;
 
 local ok, err = pcall(dofile, squishy_file);
 
 if not ok then
 	print_err("Couldn't read squishy file: "..err);
+	os.exit(1);
+end
+
+if not out_fn then
+	print_err("No output file specified by user or squishy file");
+	os.exit(1);
+elseif #main_files == 0 and #modules == 0 and #resources == 0 then
+	print_err("No files, modules or resources. Not going to generate an empty file.");
 	os.exit(1);
 end
 
