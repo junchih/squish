@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
-local short_opts = { v = "verbose", vv = "very_verbose", o = "output", q = "quiet", qq = "very_quiet" }
+local short_opts = { v = "verbose", vv = "very_verbose", o = "output", q = "quiet", qq = "very_quiet", g = "debug" }
 local opts = { use_http = false };
 
 for _, opt in ipairs(arg) do
