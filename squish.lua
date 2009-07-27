@@ -38,8 +38,13 @@ local modules, main_files, resources = {}, {}, {};
 --  Functions to be called from squishy file  --
 
 function Module(name)
+	if modules[name] then
+		print_verbose("Ignoring duplicate module definition for "..name);
+		return function () end
+	end
 	local i = #modules+1;
 	modules[i] = { name = name, url = ___fetch_url };
+	modules[name] = modules[i];
 	return function (path)
 		modules[i].path = path;
 	end
