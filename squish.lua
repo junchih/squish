@@ -66,6 +66,7 @@ function Output(fn)
 end
 
 function Option(name)
+	name = name:gsub("%-", "_");
 	if opts[name] == nil then
 		opts[name] = true;
 		return function (value)
