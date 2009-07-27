@@ -82,7 +82,7 @@ function scan_file(outfile, scanfile)
 				local binary;
 				modules[module] = true;
 				local filename = resolve_module(module, package_path);
-				if not filename then
+				if false and not filename then
 					binary = true;
 					filename = resolve_module(module, package_cpath);
 				end
