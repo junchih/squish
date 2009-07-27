@@ -168,6 +168,51 @@ if enable_debug then
 	f:write(require_resource("squish.debug"));
 end
 
+print_verbose("Resolving modules...");
+do
+	local LUA_DIRSEP = package.config:sub(1,1);
+	local LUA_PATH_MARK = package.config:sub(5,5);
+	
+	local package_path = package.path:gsub("[^;]+", function (path)
+			if not path:match("^%"..LUA_DIRSEP) then
+				return base_path..path;
+			end
+		end):gsub("/%./", "/");
+	local package_cpath = package.cpath:gsub("[^;]+", function (path)
+			if not path:match("^%"..LUA_DIRSEP) then
+				return base_path..path;
+			end
+		end):gsub("/%./", "/");
+
+	function resolve_module(name, path)
+	        name = name:gsub("%.", LUA_DIRSEP);
+	        for c in path:gmatch("[^;]+") do
+	                c = c:gsub("%"..LUA_PATH_MARK, name);
+	                print_debug("Looking for "..c)
+	                local f = io.open(c);
+	                if f then
+	                	print_debug("Found!");
+	                        f:close();
+                        return c;
+                	end
+        	end
+        	return nil; -- not found
+	end
+
+	for i, module in ipairs(modules) do
+		if not module.path then
+			module.path = resolve_module(module.name, package_path);
+			if not module.path then
+				print_err("Couldn't resolve module: "..module.name);
+			else
+				-- Strip base_path from resolved path
+				module.path = module.path:gsub("^"..base_path:gsub("%p", "%%%1"), "");
+			end
+		end
+	end
+end
+
+
 print_verbose("Packing modules...");
 for _, module in ipairs(modules) do
 	local modulename, path = module.name, base_path..module.path;
