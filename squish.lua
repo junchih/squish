@@ -252,7 +252,7 @@ if #resources > 0 then
 		f:write(data);
 		f:write("]", string.rep("=", maxequals+1), "];");
 	end
-	if opts.enable_virtual_io then
+	if opts.virtual_io then
 		local vio = require_resource("vio");
 		if not vio then
 			print_err("Virtual IO requested but is not enabled in this build of squish");
