@@ -81,7 +81,7 @@ function uglify_file(infile_fn, outfile_fn)
 
 	-- Close string/functions	
 	outfile:write("]", string.rep("=", maxequals+1), "]");
-	outfile:write("))()");
+	outfile:write(", '@", outfile_fn,"'))()");
 	outfile:close();
 	os.rename(outfile_fn..".uglified", outfile_fn);
 end
