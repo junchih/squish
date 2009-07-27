@@ -1,5 +1,18 @@
 #!/usr/bin/env lua
 
+if not arg[1] or arg[1]:match("%-%-?help") or arg[1]:match("^[/-]%?$") then
+	print "make_squishy - Generate squishy files for your projects"
+	print ""
+	print(" Usage: "..arg[0].." FILE1 FILE2 FILE...");
+	print ""
+	print "make_squishy will scan the given files for require() calls, and convert the "
+	print "found modules into a squishy file, 'squishy.new'. make_squishy automatically scans "
+	print "the modules it finds, looking for further dependencies. To disable this, use "
+	print "the --no-recursion option."
+	return;
+end
+
+
 local short_opts = { v = "verbose", vv = "very_verbose", o = "output", q = "quiet", qq = "very_quiet", f = "force" }
 local files, opts = {}, {};
 local scanned_files, modules = {}, {};
