@@ -160,30 +160,7 @@ if opts.executable then
 end
 
 if enable_debug then
-	f:write [[
-	local function ___rename_chunk(chunk, name)
-		if type(chunk) == "function" then
-			chunk = string.dump(chunk);
-		end
-		local intsize = chunk:sub(8,8):byte();
-		local b = { chunk:sub(13, 13+intsize-1):byte(1, intsize) };
-		local oldlen = 0;
-		for i = 1, #b do 
-			oldlen = oldlen + b[i] * 2^((i-1)*8);
-		end
-		
-		local newname = name.."\0";
-		local newlen = #newname;
-		
-		local b = { };
-		for i=1,intsize do
-			b[i] = string.char(math.floor(newlen / 2^((i-1)*8)) % (2^(i*8)));
-		end
-		
-		return loadstring(chunk:sub(1, 12)..table.concat(b)..newname
-			..chunk:sub(13+intsize+oldlen, -1));
-	end
-	]];
+	f:write(require_resource("squish.debug"));
 end
 
 print_verbose("Packing modules...");
@@ -200,7 +177,7 @@ for _, module in ipairs(modules) do
 		f:write(data);
 		f:write("end)\n");
 		if enable_debug then
-			f:write(string.format("package.preload[%q] = ___rename_chunk(package.preload[%q], %q);\n\n", 
+			f:write(string.format("package.preload[%q] = ___adjust_chunk(package.preload[%q], %q);\n\n", 
 				modulename, modulename, "@"..path));
 		end
 	else
