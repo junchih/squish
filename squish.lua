@@ -145,7 +145,11 @@ else
 end
 
 print_info("Writing "..out_fn.."...");
-local f = io.open(out_fn, "w+");
+local f, err = io.open(out_fn, "w+");
+if not f then
+	print_err("Couldn't open output file: "..tostring(err));
+	os.exit(1);
+end
 
 if opts.executable then
 	if opts.executable == true then
