@@ -59,6 +59,15 @@ squishing large tricky-to-debug applications and libraries.
 **Note:** Minification may interfere with the line number calculation, use --minify-level=debug to enable all features of minify 
 that don't change line numbers, and everything will be fine.
 
+### Virtual IO
+Squish allows you to pack resources (any file) into the squished output. Sometimes it would be convenient to access these through 
+the standard Lua io interface. Well now you can! :)
+
+#### --virtual-io
+Inserts code into the squished output which replaces io.open, io.lines, dofile and loadfile. The new functions will first check 
+whether the specified filename matches a packed resource's name. If it does then it will operate on that resource instead of an 
+actual file. If the filename does _not_ match a resource then the function passes on to the real Lua functions.
+
 ## Squishy reference
 
 A squishy file is actually a Lua script which calls some Squish functions. These functions are listed here.
