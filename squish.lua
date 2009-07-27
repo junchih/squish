@@ -31,8 +31,6 @@ if opts.very_verbose then print_debug = print; end
 
 print = print_verbose;
 
-local enable_debug = opts.enable_debug;
-
 local modules, main_files, resources = {}, {}, {};
 
 --  Functions to be called from squishy file  --
@@ -164,7 +162,7 @@ if opts.executable then
 	end
 end
 
-if enable_debug then
+if opts.debug then
 	f:write(require_resource("squish.debug"));
 end
 
@@ -226,7 +224,7 @@ for _, module in ipairs(modules) do
 		f:write("package.preload['", modulename, "'] = (function (...)\n");
 		f:write(data);
 		f:write("end)\n");
-		if enable_debug then
+		if opts.debug then
 			f:write(string.format("package.preload[%q] = ___adjust_chunk(package.preload[%q], %q);\n\n", 
 				modulename, modulename, "@"..path));
 		end
