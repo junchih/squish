@@ -99,3 +99,11 @@ as the path.
 **Experimental** feature which is subject to change. When specified, all the following Module statements will be 
 fetched via HTTP if not found on the filesystem. A ? (question mark) in the URL is replaced by the relative path 
 of the module file that was given in the Module statement.
+
+## make_squishy
+
+Squish includes a small utility which aims to help with converting a project to use Squish. Pass it a list of files 
+and it will scan those files looking for calls to require(). It will then attempt to resolve the module names to 
+files relative to the directory of the first filename passed to make_squishy.
+
+It generates a 'squishy.new' file in the current directory. Modify accordingly and rename to just 'squishy'.
