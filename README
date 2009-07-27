@@ -51,7 +51,7 @@ Enables compilation of the output file.
 Due to the way Squish combines multiple scripts into one, sometimes when a squished script raises an error the traceback 
 will be fairly unhelpful, and point to a line in the unreadable squished script. This is where the debug extension comes in!
 
-#### --enable-debug
+#### --debug
 This option includes some code into the squished file which will restore the filenames and line numbers in error messages and 
 tracebacks. This option will increase the size of the output by no more than about 6KB, so may be very much worth it when 
 squishing large tricky-to-debug applications and libraries.
