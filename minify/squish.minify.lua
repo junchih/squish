@@ -5,14 +5,20 @@ local lparser = require "lparser"
 
 local minify_defaults = {
 	none = {};
+	debug = { "whitespace", "locals", "entropy", "comments", "numbers" };
 	default = { "comments", "whitespace", "emptylines", "numbers", "locals" };
 	basic = { "comments", "whitespace", "emptylines" };
-	maximum = { "comments", "whitespace", "emptylines", "eols", "strings", "numbers", "locals", "entropy" };
+	full = { "comments", "whitespace", "emptylines", "eols", "strings", "numbers", "locals", "entropy" };
 	}
-minify_defaults.full = minify_defaults.maximum;
 
+if opts.minify_level and not minify_defaults[opts.minify_level] then
+	print_err("Unknown minify level: "..opts.minify_level);
+	print_err("Available minify levels: none, basic, default, full, debug");
+end
 for _, opt in ipairs(minify_defaults[opts.minify_level or "default"] or {}) do
-	opts["minify_"..opt] = true;
+	if opts["minify_"..opt] == nil then
+		opts["minify_"..opt] = true;
+	end
 end
 
 local option = {
