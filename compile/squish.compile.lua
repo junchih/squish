@@ -1,14 +1,23 @@
 
--- Not entirely sure that this is correct
--- (produces files twice the size of luac)
--- but it appears to work...
+local cs = require "minichunkspy"
 
 function compile_string(str, name)
 	-- Strips debug info, if you're wondering :)
-	local b=string.dump(assert(loadstring(str,name)))
-	local x,y=string.find(b,str.."\0")
-	if not (x and y) then return b; end -- No debug info sometimes?
-	return string.sub(b,1,x-5).."\0\0\0\0"..string.sub(b, y+1, -1)
+	local chunk = string.dump(loadstring(str, name));
+	if ((not opts.debug) or opts.compile_strip) and opts.compile_strip ~= false then
+		local c = cs.disassemble(chunk);
+		local function strip_debug(c)
+			c.source_lines, c.locals, c.upvalues = {}, {}, {};
+			
+			for i, f in ipairs(c.prototypes) do
+				strip_debug(f);
+			end
+		end
+		print_verbose("Stripping debug info...");
+		strip_debug(c.body);
+		return cs.assemble(c);
+	end
+	return chunk;
 end
 
 function compile_file(infile_fn, outfile_fn)

@@ -29,6 +29,7 @@ end
 
 -- Compile output files to Lua bytecode
 if GetOption "with-compile" then
+	Module "minichunkspy" "compile/minichunkspy.lua"
 	Main "compile/squish.compile.lua"
 end
 
