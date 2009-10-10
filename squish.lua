@@ -239,7 +239,7 @@ if #resources > 0 then
 	f:write("do local resources = {};\n");
 	for _, resource in ipairs(resources) do
 		local name, path = resource.name, resource.path;
-		local res_file, err = io.open(base_path..path);
+		local res_file, err = io.open(base_path..path, "rb");
 		if not res_file then
 			print_err("Couldn't load resource: "..tostring(err));
 			os.exit(1);
@@ -248,9 +248,10 @@ if #resources > 0 then
 		local maxequals = 0;
 		data:gsub("(=+)", function (equals_string) maxequals = math.max(maxequals, #equals_string); end);
 		
-		f:write(("resources[%q] = ["):format(name), string.rep("=", maxequals+1), "[");
+		f:write(("resources[%q] = %q"):format(name, data));
+--[[		f:write(("resources[%q] = ["):format(name), string.rep("=", maxequals+1), "[");
 		f:write(data);
-		f:write("]", string.rep("=", maxequals+1), "];");
+		f:write("]", string.rep("=", maxequals+1), "];"); ]]
 	end
 	if opts.virtual_io then
 		local vio = require_resource("vio");
