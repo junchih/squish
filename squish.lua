@@ -260,7 +260,7 @@ if #resources > 0 then
 		else
 			-- Insert vio library
 			f:write(vio, "\n")
-			-- Override io.open to use vio if opening a resource
+			-- Override standard functions to use vio if opening a resource
 			f:write[[local io_open, io_lines = io.open, io.lines; function io.open(fn, mode)
 					if not resources[fn] then
 						return io_open(fn, mode);
