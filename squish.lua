@@ -65,7 +65,9 @@ function Main(fn)
 end
 
 function Output(fn)
-	out_fn = fn;
+	if opts.output == nil then
+		out_fn = fn;
+	end
 end
 
 function Option(name)
