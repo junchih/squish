@@ -59,7 +59,7 @@ function uglify_file(infile_fn, outfile_fn)
 	local maxequals = 0;
 	data:gsub("(=+)", function (equals_string) maxequals = math.max(maxequals, #equals_string); end);
 	
-	outfile:write [[assert(loadstring(prettify]]
+	outfile:write [[return assert(loadstring(prettify]]
 	outfile:write("[", string.rep("=", maxequals+1), "[");
 	
 	-- Write code, substituting tokens as we go
