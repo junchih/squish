@@ -34,10 +34,15 @@ They vary in effectiveness, and the time taken to process large files. Experimen
 ### Uglify
 'Uglification' is the name Squish gives to a certain basic form of compression. With large files it can reduce the 
 size by some kilobytes, even after full minification. It works by replacing Lua keywords with a single byte and 
-inserting code at the start of the script to expand the keywords when it is run.
+inserting some short code at the start of the script to expand the keywords when it is run.
 
 #### --uglify
 Enable the uglification filter. Default is to not uglify.
+
+#### --uglify-level=LEVEL
+If the level specified is "full" then Squish will extend its replacement to identifiers and string literals, as
+well as Lua keywords. It first assigns each identifier and string a score based on its length and how many times
+it appears in the file. The top scorers are assigned single-byte identifiers and replaced the same as the keywords.
 
 ### Gzip
 Gzip, or rather the DEFLATE algorithm, is extremely good at compressing text-based data, including scripts. Using
