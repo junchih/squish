@@ -47,27 +47,61 @@ function uglify_file(infile_fn, outfile_fn)
 	for i, keyword in ipairs(keywords) do
 		keyword_map_to_char[keyword] = string.char(base_char + i);
 	end
-	
-	outfile:write("local base_char,keywords=", tostring(base_char), ",{");
-	for _, keyword in ipairs(keywords) do
-		outfile:write('"', keyword, '",');
-	end
-	outfile:write[[}; function prettify(code) return code:gsub("["..string.char(base_char).."-"..string.char(base_char+#keywords).."]", 
-	function (c) return keywords[c:byte()-base_char]; end) end ]]
-	
+
 	-- Write loadstring and open string
 	local maxequals = 0;
 	data:gsub("(=+)", function (equals_string) maxequals = math.max(maxequals, #equals_string); end);
+	
+	-- Go lexer!
+	llex.init(code, "@"..infile_fn);
+	llex.llex()
+	local seminfo = llex.seminfo;
+	
+	if opts.uglify_level == "full" then
+		-- Find longest TK_NAME and TK_STRING tokens
+		local scores = {};
+		for k,v in ipairs(llex.tok) do
+			if v == "TK_NAME" or v == "TK_STRING" then
+				local key = string.format("%q,%q", v, seminfo[k]);
+				if not scores[key] then
+					scores[key] = { type = v, value = seminfo[k], count = 0 };
+					scores[#scores+1] = scores[key];
+				end
+				scores[key].count = scores[key].count + 1;
+			end
+		end
+		for i=1,#scores do
+			local v = scores[i];
+			v.score = (v.count)*(#v.value-1)- #string.format("%q", v.value) - 1;
+		end
+		table.sort(scores, function (a, b) return a.score > b.score; end);
+		local free_space = 255-(base_char+#keywords);
+		for i=free_space+1,#scores do
+			scores[i] = nil; -- Drop any over the limit
+		end
+	
+		local base_keywords_len = #keywords;
+		for k,v in ipairs(scores) do
+			if v.score > 0 then
+				table.insert(keywords, v.value);
+				keyword_map_to_char[v.value] = string.char(base_char+base_keywords_len+k);
+			end
+		end
+	end
+	
+	outfile:write("local base_char,keywords=", tostring(base_char), ",{");
+	for _, keyword in ipairs(keywords) do
+		outfile:write(string.format("%q", keyword), ',');
+	end
+	outfile:write[[}; function prettify(code) return code:gsub("["..string.char(base_char).."-"..string.char(base_char+#keywords).."]", 
+	function (c) return keywords[c:byte()-base_char]; end) end ]]
 	
 	outfile:write [[return assert(loadstring(prettify]]
 	outfile:write("[", string.rep("=", maxequals+1), "[");
 	
 	-- Write code, substituting tokens as we go
-	llex.init(code, "@"..infile_fn);
-	llex.llex()
-	local seminfo = llex.seminfo;
 	for k,v in ipairs(llex.tok) do
-		if v == "TK_KEYWORD" then
+		if v == "TK_KEYWORD" or v == "TK_NAME" or v == "TK_STRING" then
 			local keyword_char = keyword_map_to_char[seminfo[k]];
 			if keyword_char then
 				outfile:write(keyword_char);
@@ -91,4 +125,3 @@ if opts.uglify then
 	uglify_file(out_fn, out_fn);
 	print_info("OK!");
 end
-
