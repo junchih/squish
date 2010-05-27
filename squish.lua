@@ -225,7 +225,7 @@ for _, module in ipairs(modules) do
 	if data then
 		f:write("package.preload['", modulename, "'] = (function (...)\n");
 		f:write(data);
-		f:write("end)\n");
+		f:write(" end)\n");
 		if opts.debug then
 			f:write(string.format("package.preload[%q] = ___adjust_chunk(package.preload[%q], %q);\n\n", 
 				modulename, modulename, "@"..path));
