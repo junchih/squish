@@ -37,6 +37,11 @@ if GetOption "with-virtual-io" then
 	Resource "vio" "vio/vio.lua"
 end
 
+if GetOption "with-gzip" then
+	Resource "gunzip.lua" "gunzip.lua"
+	Main "gzip/squish.gzip.lua"
+end
+
 if GetOption "with-debug" then
 	Resource "squish.debug" "squish.debug"
 end
