@@ -1,0 +1,3 @@
+Option "minify-level" "full"
+Main "deflatelua.lua"
+Output "gunzip.lua"
