@@ -26,13 +26,11 @@ function gzip_file(infile_fn, outfile_fn)
 	local maxequals = 0;
 	code:gsub("(=+)", function (equals_string) maxequals = math.max(maxequals, #equals_string); end);
 	
-	outfile:write(require_resource "gunzip.lua");
+	outfile:write("local ungz = (function ()", require_resource "gunzip.lua", " end)()\n");
 		
-	outfile:write[[function _gunzip(data) local uncompressed = {};
-	gunzip{input=data,output=function(b) table.insert(uncompressed, string.char(b)) end};
-	return table.concat(uncompressed, ""); end ]];
+	outfile:write[[return assert(loadstring((function (i)local o={} ungz{input=i,output=function(b)table.insert(o,string.char(b))end}return table.concat(o)end) ]];
 
-	outfile:write [[return assert(loadstring(_gunzip]]
+	--outfile:write [[return assert(loadstring(_gunzip]]
 	outfile:write(string.format("%q", code));
 	--outfile:write("[", string.rep("=", maxequals+1), "[", code, "]", string.rep("=", maxequals+1), "]");
 	outfile:write(", '@", outfile_fn,"'))()");

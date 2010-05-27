@@ -436,7 +436,7 @@ local function deflate(t)
   repeat until parse_block(bs, os)
 end
 
-function gunzip(t)
+return function (t)
   local bs = get_bitstream(t.input)
   local outbs = get_obytestream(t.output)
 
