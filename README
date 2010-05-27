@@ -39,6 +39,15 @@ inserting code at the start of the script to expand the keywords when it is run.
 #### --uglify
 Enable the uglification filter. Default is to not uglify.
 
+### Gzip
+Gzip, or rather the DEFLATE algorithm, is extremely good at compressing text-based data, including scripts. Using
+this extension compresses the squished code, and adds some runtime decompression code. This decompression code adds
+a little bit of time to the loading of the script, and adds 4K to the size of the generated code, but the overall
+savings are usually well worth it.
+
+#### --gzip
+Compress the generated code with gzip. Requires the gzip command-line utility (for compression only).
+
 ### Compile
 Squish can compile the resulting file to Lua bytecode. This is experimental at this stage (you may get better results 
 with luac right now), however it's a work in progress. Compiling to bytecode can actually increase the size of 
