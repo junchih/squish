@@ -9,23 +9,35 @@
 -- chunk = minichunkspy.assemble(disassembled_chunk)
 -- assert(minichunkspy.validate(<function or chunk>))
 --
--- Tested on little-endian 32 bit platforms.  Modify
--- the Size_t type to be a 64 bit integer to make it work
--- for 64 bit systems, and set BIG_ENDIAN = true for
--- big-endian systems.
+-- Tested on little-endian 32 and 64 bit platforms.
 local string, table, math = string, table, math
 local ipairs, setmetatable, type, assert = ipairs, setmetatable, type, assert
 local _ = __END_OF_GLOBALS__
 local string_char, string_byte, string_sub = string.char, string.byte, string.sub
+local math_frexp, math_ldexp, math_abs = math.frexp, math.ldexp, math.abs
 local table_concat = table.concat
-local math_abs, math_ldexp, math_frexp = math.abs, math.ldexp, math.frexp
 local Inf = math.huge
-local Nan = Inf - Inf
+local NaN = Inf - Inf
 
-local BIG_ENDIAN = false	--twiddle this for your platform.
+local BIG_ENDIAN = false
+local SIZEOF_SIZE_T = 4
+local SIZEOF_INT = 4
+local SIZEOF_NUMBER = 8
 
-local function construct (class, ...)
-    return class.new(class, ...)
+local save_stack = {}
+
+local function save()
+    save_stack[#save_stack+1]
+	= {BIG_ENDIAN, SIZEOF_SIZE_T, SIZEOF_INT, SIZEOF_NUMBER}
+end
+local function restore ()
+    BIG_ENDIAN, SIZEOF_SIZE_T, SIZEOF_INT, SIZEOF_NUMBER
+	= unpack(save_stack[#save_stack])
+    save_stack[#save_stack] = nil
+end
+
+local function construct (class, self)
+    return class.new(class, self)
 end
 
 local mt_memo = {}
@@ -89,19 +101,152 @@ local uint32 = Field{
 	end
 }
 
-local int32 = uint32{
-    unpack = function (self, bytes, ix)
-		 local val, ix = uint32:unpack(bytes, ix)
-		 return val < 2^32 and val or (val - 2^31), ix
-	     end
+local uint64 = Field{
+    unpack =
+	function (self, bytes, ix)
+	    local a = uint32:unpack(bytes, ix)
+	    local b = uint32:unpack(bytes, ix+4)
+	    if BIG_ENDIAN then a,b = b,a end
+	    return a + b*2^32, ix+8
+	end,
+    pack =
+	function (self, val)
+	    assert(type(val) == "number",
+		   "unexpected value type to pack as an uint64")
+	    local a = val % 2^32
+	    local b = (val - a) / 2^32
+	    if BIG_ENDIAN then a,b = b,a end
+	    return uint32:pack(a) .. uint32:pack(b)
+	end
+}
+
+local function explode_double(bytes, ix)
+    local a = uint32:unpack(bytes, ix)
+    local b = uint32:unpack(bytes, ix+4)
+    if BIG_ENDIAN then a,b = b,a end --XXX: ARM mixed-endian
+
+    local sig_hi = b % 2^20
+    local sig_lo = a
+    local significand = sig_lo + sig_hi*2^32
+
+    b = (b - sig_hi) / 2^20
+
+    local biased_exp = b % 2^11
+    local sign = b <= biased_exp and 1 or -1
+
+    --print(sign, significand, biased_exp, "explode")
+    return sign, biased_exp, significand
+end
+
+local function implode_double(sign, biased_exp, significand)
+    --print(sign, significand, biased_exp, "implode")
+    local sig_lo = significand % 2^32
+    local sig_hi = (significand - sig_lo) / 2^32
+
+    local a = sig_lo
+    local b = ((sign < 0 and 2^11 or 0) + biased_exp)*2^20 + sig_hi
+
+    if BIG_ENDIAN then a,b = b,a end --XXX: ARM mixed-endian
+    return uint32.pack(nil, a) .. uint32.pack(nil, b)
+end
+
+local function math_sign(x)
+    if x ~= x then return x end	--sign of NaN is NaN
+    if x == 0 then x = 1/x end	--extract sign of zero
+    return x > 0 and 1 or -1
+end
+
+local SMALLEST_SUBNORMAL = math_ldexp(1, -1022 - 52)
+local SMALLEST_NORMAL = SMALLEST_SUBNORMAL * 2^52
+local LARGEST_SUBNORMAL = math_ldexp(2^52 - 1, -1022 - 52)
+local LARGEST_NORMAL = math_ldexp(2^53 - 1, 1023 - 52)
+assert(SMALLEST_SUBNORMAL ~= 0.0 and SMALLEST_SUBNORMAL / 2 == 0.0)
+assert(LARGEST_NORMAL ~= Inf)
+assert(LARGEST_NORMAL * 2 == Inf)
+
+local double = Field{
+    unpack =
+	function (self, bytes, ix)
+	    local sign, biased_exp, significand = explode_double(bytes, ix)
+
+	    local val
+	    if biased_exp == 0 then --subnormal
+		val = math_ldexp(significand, -1022 - 52)
+	    elseif biased_exp == 2047 then
+		val = significand == 0 and Inf or NaN --XXX: loses NaN mantissa
+	    else				      --normal
+		val = math_ldexp(2^52 + significand, biased_exp - 1023 - 52)
+	    end
+	    val = sign*val
+	    return val, ix+8
+	end,
+
+    pack =
+	function (self, val)
+	    if val ~= val then
+		return implode_double(1,2047,2^52-1) --XXX: loses NaN mantissa
+	    end
+
+	    local sign = math_sign(val)
+	    val = math_abs(val)
+
+	    if val == Inf then return implode_double(sign, 2047, 0) end
+	    if val == 0   then return implode_double(sign, 0, 0) end
+
+	    local biased_exp, significand
+
+	    if val <= LARGEST_SUBNORMAL then
+		biased_exp = 0
+		significand = val / SMALLEST_SUBNORMAL
+	    else
+		local frac, exp = math_frexp(val)
+		significand = (2*frac - 1)*2^52
+		biased_exp = exp + 1022
+	    end
+	    return implode_double(sign, biased_exp, significand)
+	end
 }
 
 local Byte = uint8
-local Size_t = uint32
-local Integer = int32
+
+local IntegralTypes = {
+    [4] = uint32,
+    [8] = uint64
+}
+
+local FloatTypes = {
+    [4] = float,
+    [8] = double
+}
+
+local Size_t = Field{
+    unpack = function (self, bytes, ix)
+		 return IntegralTypes[SIZEOF_SIZE_T]:unpack(bytes, ix)
+	     end,
+    pack = function (self, val)
+	       return IntegralTypes[SIZEOF_SIZE_T]:pack(val)
+	   end,
+}
+
+local Integer = Field{
+    unpack = function (self, bytes, ix)
+		 return IntegralTypes[SIZEOF_INT]:unpack(bytes, ix)
+	     end,
+    pack = function (self, val)
+	       return IntegralTypes[SIZEOF_INT]:pack(val)
+	   end,
+}
+
+local Number = Field{
+    unpack = function (self, bytes, ix)
+		 return FloatTypes[SIZEOF_NUMBER]:unpack(bytes, ix)
+	     end,
+    pack = function (self, val)
+	       return FloatTypes[SIZEOF_NUMBER]:pack(val)
+	   end,
+}
 
 -- Opaque types:
-local Number = char(8)
 local Insn = char(4)
 
 local Struct = Field{
@@ -177,7 +322,7 @@ local Boolean = Field{
 local String = Field{
     unpack =
 	function (self, bytes, ix)
-	    local len, ix = Integer:unpack(bytes, ix)
+	    local len, ix = Size_t:unpack(bytes, ix)
 	    local val = nil
 	    if len > 0 then
 		-- len includes trailing nul byte; ignore it
@@ -191,9 +336,9 @@ local String = Field{
 	    assert(type(val) == "nil" or type(val) == "string",
 		   "unexpected value type to pack as a String")
 	    if val == nil then
-		return Integer:pack(0)
+		return Size_t:pack(0)
 	    end
-	    return Integer:pack(#val+1) .. val .. "\000"
+	    return Size_t:pack(#val+1) .. val .. "\000"
 	end
 }
 
@@ -222,6 +367,9 @@ local Constant = Field{
 	    local field = ConstantTypes[t]
 	    assert(field, "unknown constant type "..t.." to unpack")
 	    local v, ix = field:unpack(bytes, ix)
+	    if t == 3 then
+		assert(type(v) == "number")
+	    end
 	    return {
 		type = t,
 		value = v
@@ -259,9 +407,46 @@ assert(Function[10].name == "prototypes",
        "missed the function prototype list")
 Function[10].type = Function
 
-local Chunk = Struct{
-    ChunkHeader{name = "header"},
-    Function{name = "body"}
+local Chunk = Field{
+    unpack =
+	function (self, bytes, ix)
+	    local chunk = {}
+	    local header, ix = ChunkHeader:unpack(bytes, ix)
+	    assert(header.signature == "\027Lua", "signature check failed")
+	    assert(header.version == 81, "version mismatch")
+	    assert(header.format == 0, "format mismatch")
+	    assert(header.endianness == 0 or
+		   header.endianness == 1, "endianness mismatch")
+	    assert(IntegralTypes[header.sizeof_int], "int size unsupported")
+	    assert(IntegralTypes[header.sizeof_size_t], "size_t size unsupported")
+	    assert(header.sizeof_insn == 4, "insn size unsupported")
+	    assert(FloatTypes[header.sizeof_Number], "number size unsupported")
+	    assert(header.integral_flag == 0, "integral flag mismatch; only floats supported")
+
+	    save()
+		BIG_ENDIAN = header.endianness == 0
+		SIZEOF_SIZE_T = header.sizeof_size_t
+		SIZEOF_INT = header.sizeof_int
+		SIZEOF_NUMBER = header.sizeof_Number
+		chunk.header = header
+		chunk.body, ix = Function:unpack(bytes, ix)
+	    restore()
+	    return chunk, ix
+	end,
+
+    pack =
+	function (self, val)
+	    local data
+	    save()
+		local header = val.header
+		BIG_ENDIAN = header.endianness == 0
+		SIZEOF_SIZE_T = header.sizeof_size_t
+		SIZEOF_INT = header.sizeof_int
+		SIZEOF_NUMBER = header.sizeof_Number
+		data = ChunkHeader:pack(val.header) .. Function:pack(val.body)
+	    restore()
+	    return data
+	end
 }
 
 local function validate(chunk)
