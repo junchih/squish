@@ -29,10 +29,10 @@ function uglify_file(infile_fn, outfile_fn)
 	end
 
 	
-	while base_char + #keywords < 255 and code:find("["..string.char(base_char).."-"..string.char(base_char+#keywords-1).."]") do
+	while base_char + #keywords <= 255 and code:find("["..string.char(base_char).."-"..string.char(base_char+#keywords-1).."]") do
 		base_char = base_char + 1;
 	end
-	if base_char == 255 then
+	if base_char + #keywords > 255 then
 		-- Sorry, can't uglify this file :(
 		-- We /could/ use a multi-byte marker, but that would complicate
 		-- things and lower the compression ratio (there are quite a few 
@@ -57,7 +57,7 @@ function uglify_file(infile_fn, outfile_fn)
 	llex.llex()
 	local seminfo = llex.seminfo;
 	
-	if opts.uglify_level == "full" then
+	if opts.uglify_level == "full" and base_char+#keywords < 255 then
 		-- Find longest TK_NAME and TK_STRING tokens
 		local scores = {};
 		for k,v in ipairs(llex.tok) do
