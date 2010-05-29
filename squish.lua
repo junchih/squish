@@ -231,7 +231,7 @@ for _, module in ipairs(modules) do
 				modulename, modulename, "@"..path));
 		end
 	else
-		print_err("Couldn't pack module '"..modulename.."': "..err);
+		print_err("Couldn't pack module '"..modulename.."': "..(err or "unknown error... path to module file correct?"));
 		os.exit(1);
 	end
 end
