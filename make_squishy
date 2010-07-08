@@ -61,7 +61,7 @@ end
 local LUA_DIRSEP = package.config:sub(1,1);
 local LUA_PATH_MARK = package.config:sub(5,5);
 
-local base_path = files[1]:match("^(.-)"..LUA_DIRSEP.."[^"..LUA_DIRSEP.."]*$").."/";
+local base_path = (files[1]:match("^(.-)"..LUA_DIRSEP.."[^"..LUA_DIRSEP.."]*$") or ".").."/";
 
 local package_path = package.path:gsub("[^;]+", function (path)
 		if not path:match("^%"..LUA_DIRSEP) then
