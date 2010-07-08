@@ -87,7 +87,7 @@ function scan_file(outfile, scanfile)
 					filename = resolve_module(module, package_cpath);
 				end
 				if not filename then
-					print_info("Couldn't resolve "..module.." (required in "..scanfile..")");
+					print_info("Couldn't resolve module '"..module.."' to a file (required in "..scanfile..")");
 				elseif opts.recursion ~= false and not scanned_files[filename] then
 					scanned_files[filename] = true;
 					table.insert(files, filename);
