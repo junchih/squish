@@ -215,7 +215,10 @@ end
 
 print_verbose("Packing modules...");
 for _, module in ipairs(modules) do
-	local modulename, path = module.name, base_path..module.path;
+	local modulename, path = module.name, module.path;
+	if module.path:sub(1,1) ~= "/" then
+		path = base_path..module.path;
+	end
 	print_debug("Packing "..modulename.." ("..path..")...");
 	local data, err = fetch.filesystem(path);
 	if (not data) and module.url then
