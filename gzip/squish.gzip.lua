@@ -5,7 +5,7 @@ function gzip_file(infile_fn, outfile_fn)
 		return;
 	end
 	
-	local outfile, err = io.open(outfile_fn..".gzipped", "w+");
+	local outfile, err = io.open(outfile_fn..".gzipped", "wb+");
 	if not outfile then
 		print_err("Can't open output file for writing: "..tostring(err));
 		return;
