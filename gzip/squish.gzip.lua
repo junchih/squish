@@ -19,9 +19,20 @@ function gzip_file(infile_fn, outfile_fn)
 	if shebang then
 		outfile:write(shebang)
 	end
+	
+	local file_with_no_shebang, err = io.open(outfile_fn..".pregzip", "wb+");
+	if not file_with_no_shebang then
+		print_err("Can't open temp file for writing: "..tostring(err));
+		return;
+	end
+	
+	file_with_no_shebang:write(code);
+	file_with_no_shebang:close();
 
-	local compressed = io.popen("gzip -c '"..infile_fn.."'");
+	local compressed = io.popen("gzip -c '"..outfile_fn..".pregzip'");
 	code = compressed:read("*a");
+	compressed:close();
+	os.remove(outfile_fn..".pregzip");
 
 	local maxequals = 0;
 	code:gsub("(=+)", function (equals_string) maxequals = math.max(maxequals, #equals_string); end);
