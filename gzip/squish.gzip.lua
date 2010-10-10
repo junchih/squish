@@ -42,7 +42,7 @@ function gzip_file(infile_fn, outfile_fn)
 	outfile:write[[return assert(loadstring((function (i)local o={} ungz{input=i,output=function(b)table.insert(o,string.char(b))end}return table.concat(o)end) ]];
 
 	--outfile:write [[return assert(loadstring(_gunzip]]
-	outfile:write(string.format("%q", code));
+	outfile:write((string.format("%q", code):gsub("\026", "\\026")));
 	--outfile:write("[", string.rep("=", maxequals+1), "[", code, "]", string.rep("=", maxequals+1), "]");
 	outfile:write(", '@", outfile_fn,"'))()");
 	outfile:close();
