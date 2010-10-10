@@ -11,6 +11,13 @@ instructions on how to squish a project.
 
 For an example you can see Squish's own squishy file, included in this package. For reference, see below.
 
+## Building and installing
+
+Squish uses itself to squish itself and its components into a single 'squish' utility that can be run anywhere.
+To build squish, just run "make" - there are no dependencies other than Lua.
+
+You can run "make install" to copy squish to /usr/local/bin/ if you have permission.
+
 ## Squishing
 
 Running squish will search for a 'squishy' file in the current directory. Alternatively you can pass to squish 
