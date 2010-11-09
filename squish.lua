@@ -1,5 +1,8 @@
 #!/usr/bin/env lua
 
+-- Initialise LuaRocks if present
+pcall(require, "luarocks.require");
+
 local short_opts = { v = "verbose", vv = "very_verbose", o = "output", q = "quiet", qq = "very_quiet", g = "debug" }
 local opts = { use_http = false };
 
