@@ -225,8 +225,19 @@ for _, module in ipairs(modules) do
 	print_debug("Packing "..modulename.." ("..path..")...");
 	local data, err = fetch.filesystem(path);
 	if (not data) and module.url then
-		print_debug("Fetching: ".. module.url:gsub("%?", module.path))
-		data, err = fetch.http(module.url:gsub("%?", module.path));
+		local url = module.url:gsub("%?", module.path);
+		print_debug("Fetching: ".. url)
+		if url:match("^https?://") then
+			data, err = fetch.http(url);
+		elseif url:match("^file://") then
+			local dataf, dataerr = io.open((url:gsub("^file://", "")));
+			if dataf then
+				data, err = dataf:read("*a");
+				dataf:close();
+			else
+				data, err = nil, dataerr;
+			end
+		end
 	end
 	if data then
 		f:write("package.preload['", modulename, "'] = (function (...)\n");
