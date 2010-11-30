@@ -229,7 +229,7 @@ for _, module in ipairs(modules) do
 		print_debug("Fetching: ".. url)
 		if url:match("^https?://") then
 			data, err = fetch.http(url);
-		elseif url:match("^file://") then
+		elseif url:match("^file://") or url:match("^[/%.]") then
 			local dataf, dataerr = io.open((url:gsub("^file://", "")));
 			if dataf then
 				data, err = dataf:read("*a");
