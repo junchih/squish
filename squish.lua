@@ -167,10 +167,6 @@ if opts.executable then
 	end
 end
 
-if opts.debug then
-	f:write(require_resource("squish.debug"));
-end
-
 print_verbose("Resolving modules...");
 do
 	local LUA_DIRSEP = package.config:sub(1,1);
@@ -240,12 +236,14 @@ for _, module in ipairs(modules) do
 		end
 	end
 	if data then
-		f:write("package.preload['", modulename, "'] = (function (...)\n");
-		f:write(data);
-		f:write(" end)\n");
-		if opts.debug then
-			f:write(string.format("package.preload[%q] = ___adjust_chunk(package.preload[%q], %q);\n\n", 
-				modulename, modulename, "@"..path));
+		if not opts.debug then
+			f:write("package.preload['", modulename, "'] = (function (...)\n");
+			f:write(data);
+			f:write(" end)\n");
+		else
+			f:write("package.preload['", modulename, "'] = assert(loadstring(\n");
+			f:write(("%q\n"):format(data));
+			f:write(", ", ("%q"):format("@"..path), "))\n");
 		end
 	else
 		print_err("Couldn't pack module '"..modulename.."': "..(err or "unknown error... path to module file correct?"));
