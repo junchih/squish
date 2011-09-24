@@ -77,7 +77,7 @@ local package_cpath = package.cpath:gsub("[^;]+", function (path)
 
 function scan_file(outfile, scanfile)
 	for line in io.lines(scanfile) do
-		for _, module in line:gmatch("[^%w_]require%s*%(?([\"'])(.-)%1") do
+		for _, module in (" "..line):gmatch("[^%w_]require%s*%(?([\"'])(.-)%1") do
 			if not modules[module] then
 				local binary;
 				modules[module] = true;
