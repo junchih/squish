@@ -28,7 +28,6 @@
 local base = _G
 local string = require "string"
 module "lparser"
-local _G = base.getfenv()
 
 --[[--------------------------------------------------------------------
 -- variable and data structure initialization
@@ -1206,7 +1205,7 @@ local function stat()
   local fn = stat_call[c]
   -- handles: if while do for repeat function local return break
   if fn then
-    _G[fn]()
+    _M[fn]()
     -- return or break must be last statement
     if c == "return" or c == "break" then return true end
   else
@@ -1292,4 +1291,4 @@ function init(tokorig, seminfoorig, toklnorig)
   ilocalinfo, ilocalrefs = {}, {}
 end
 
-return _G
+return _M

@@ -352,4 +352,4 @@ function llex()
   end--while outer
 end
 
-return base.getfenv()
+return _M
