@@ -236,6 +236,7 @@ for _, module in ipairs(modules) do
 		end
 	end
 	if data then
+		data = data:gsub("^#[^\r\n]*\r?\n", ""); -- Remove shebang if any (or we can't concat)
 		if not opts.debug then
 			f:write("package.preload['", modulename, "'] = (function (...)\n");
 			f:write(data);
