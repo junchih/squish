@@ -196,7 +196,6 @@ do
 	end
 end
 
-print(opts.list_files)
 if opts.list_files then
 	local function write(text)
 		io.write(text, "\n");
