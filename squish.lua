@@ -152,21 +152,6 @@ else
 	end
 end
 
-print_info("Writing "..out_fn.."...");
-local f, err = io.open(out_fn, "w+");
-if not f then
-	print_err("Couldn't open output file: "..tostring(err));
-	os.exit(1);
-end
-
-if opts.executable then
-	if opts.executable == true then
-		f:write("#!/usr/bin/env lua\n");
-	else
-		f:write(opts.executable, "\n");
-	end
-end
-
 print_verbose("Resolving modules...");
 do
 	local LUA_DIRSEP = package.config:sub(1,1);
@@ -211,6 +196,20 @@ do
 	end
 end
 
+print_info("Writing "..out_fn.."...");
+local f, err = io.open(out_fn, "w+");
+if not f then
+	print_err("Couldn't open output file: "..tostring(err));
+	os.exit(1);
+end
+
+if opts.executable then
+	if opts.executable == true then
+		f:write("#!/usr/bin/env lua\n");
+	else
+		f:write(opts.executable, "\n");
+	end
+end
 
 print_verbose("Packing modules...");
 for _, module in ipairs(modules) do
