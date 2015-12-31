@@ -203,9 +203,16 @@ for _, module in ipairs(modules) do
 	end
 end
 
-if opts.list_files then
-	local function write(text)
-		io.write(text, "\n");
+if opts.list_files or opts.list_missing_files then
+	local function write(filename)
+		if opts.list_missing_files then
+	                local f = io.open(filename);
+	                if f then
+	                	f:close();
+	                	return;
+	                end		
+		end
+		io.write(filename, "\n");
 	end
 	for _, fn in pairs(main_files) do
 		write(fn);
