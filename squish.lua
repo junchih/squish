@@ -196,6 +196,23 @@ do
 	end
 end
 
+print(opts.list_files)
+if opts.list_files then
+	local function write(text)
+		io.write(text, "\n");
+	end
+	for _, fn in pairs(main_files) do
+		write(fn);
+	end
+	for _, module in ipairs(modules) do
+		write(module.path);
+	end
+	for _, resource in ipairs(resources) do
+		write(resource.path);
+	end
+	return;
+end
+
 print_info("Writing "..out_fn.."...");
 local f, err = io.open(out_fn, "w+");
 if not f then
