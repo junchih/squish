@@ -196,6 +196,13 @@ do
 	end
 end
 
+for _, module in ipairs(modules) do
+	if not module.path then
+		print_err("Exiting due to missing modules without a path");
+		os.exit(1);
+	end
+end
+
 if opts.list_files then
 	local function write(text)
 		io.write(text, "\n");
