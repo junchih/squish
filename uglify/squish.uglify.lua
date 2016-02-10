@@ -96,7 +96,7 @@ function uglify_file(infile_fn, outfile_fn)
 	outfile:write[[}; function prettify(code) return code:gsub("["..string.char(base_char).."-"..string.char(base_char+#keywords).."]", 
 	function (c) return keywords[c:byte()-base_char]; end) end ]]
 	
-	outfile:write [[return assert(loadstring(prettify]]
+	outfile:write [[return setfenv(assert(loadstring(prettify]]
 	outfile:write("[", string.rep("=", maxequals+1), "[");
 	
 	-- Write code, substituting tokens as we go
@@ -115,7 +115,7 @@ function uglify_file(infile_fn, outfile_fn)
 
 	-- Close string/functions	
 	outfile:write("]", string.rep("=", maxequals+1), "]");
-	outfile:write(", '@", outfile_fn,"'))()");
+	outfile:write(", '@", outfile_fn,"')), getfenv())()");
 	outfile:close();
 	os.rename(outfile_fn..".uglified", outfile_fn);
 end
