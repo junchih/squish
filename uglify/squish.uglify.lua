@@ -13,7 +13,7 @@ function uglify_file(infile_fn, outfile_fn)
 		return;
 	end
 	
-	local outfile, err = io.open(outfile_fn..".uglified", "wb+");
+	local outfile, err = io.open(outfile_fn..".uglified", "w+b");
 	if not outfile then
 		print_err("Can't open output file for writing: "..tostring(err));
 		return;
