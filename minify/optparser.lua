@@ -52,7 +52,7 @@ local SKIP_NAME = {}
 for v in string.gmatch([[
 and break do else elseif end false for function if in
 local nil not or repeat return then true until while
-self]], "%S+") do
+self _ENV]], "%S+") do
   SKIP_NAME[v] = true
 end
 
@@ -256,10 +256,10 @@ function optimize(option, _toklist, _seminfolist, _globalinfo, _localinfo)
   local temp, j, gotself = {}, 1, false
   for i = 1, #object do
     local obj = object[i]
-    if not obj.isself then
+    if not obj.preserve then
       temp[j] = obj
       j = j + 1
-    else
+    elseif obj.name == "self" then
       gotself = true
     end
   end

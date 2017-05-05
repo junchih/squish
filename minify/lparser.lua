@@ -249,8 +249,8 @@ local function new_localvar(name, special)
     xref = { nameref },         -- xref, first value is declaration
     decl = nameref,             -- location of declaration, = xref[1]
   }
-  if special then               -- "self" must be not be changed
-    localinfo[id].isself = true
+  if special or name == "_ENV" then               -- "self" must be not be changed
+    localinfo[id].preserve = true
   end
   -- this can override a local with the same name in the same scope
   -- but first, keep it inactive until it gets activated
