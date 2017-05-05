@@ -830,3 +830,5 @@ function optimize(option, toklist, semlist, toklnlist)
   if opt_details and opt_details > 0 then print() end -- spacing
   return stoks, sinfos, stoklns
 end
+
+return _M;

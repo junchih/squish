@@ -440,3 +440,5 @@ function optimize(option, _toklist, _seminfolist, _globalinfo, _localinfo)
   local afteruniq = preprocess(localinfo)
   ------------------------------------------------------------------
 end
+
+return _M;
