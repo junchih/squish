@@ -4,7 +4,7 @@
 pcall(require, "luarocks.require");
 
 local short_opts = { v = "verbose", vv = "very_verbose", o = "output", q = "quiet", qq = "very_quiet", g = "debug" }
-local opts = { use_http = false };
+local opts = { use_http = false, module_compat = not not _ENV };
 
 for _, opt in ipairs(arg) do
 	if opt:match("^%-") then
@@ -268,6 +268,21 @@ for _, module in ipairs(modules) do
 		data = data:gsub("^#[^\r\n]*\r?\n", ""); -- Remove shebang if any (or we can't concat)
 		if not opts.debug then
 			f:write("package.preload['", modulename, "'] = (function (...)\n");
+			if opts.module_compat then
+				f:write [[
+					local _ENV = _ENV;
+					local function module(name, ...)
+						local t = package.loaded[name] or _ENV[name] or { _NAME = name };
+						package.loaded[name] = t;
+						for i = 1, select("#", ...) do
+							(select(i, ...))(t);
+						end
+						_ENV = t;
+						_M = t;
+						return t;
+					end
+				]];
+			end
 			f:write(data);
 			f:write(" end)\n");
 		else
