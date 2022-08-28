@@ -1,5 +1,8 @@
 
-DESTDIR=/usr/local
+ifeq ($(DESTDIR),)
+	DESTDIR=/usr/local
+endif
+
 OPTIONS=-q --with-minify --with-uglify --with-compile --with-virtual-io
 
 squish: squish.lua squishy
