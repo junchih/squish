@@ -17,7 +17,7 @@ for _, opt in ipairs(arg) do
 			opts[name] = opt:match("=(.*)$") or true;
 		end
 	else
-		base_path = opt;
+		squishy_file = opt;
 	end
 end
 
@@ -106,8 +106,8 @@ function Exit()
 end
 -- -- -- -- -- -- -- --- -- -- -- -- -- -- -- --
 
-base_path = (base_path or "."):gsub("/$", "").."/"
-squishy_file = base_path .. "squishy";
+squishy_file = squishy_file or "./squishy"
+base_path = string.match(squishy_file, "(.*/)") or "./"
 out_fn = opts.output;
 
 local ok, err = pcall(dofile, squishy_file);
